@@ -1,13 +1,5 @@
-const properties = require("./json/properties.json");
-const users = require("./json/users.json");
-const { Pool } = require("pg");
+const db = require("./db");
 
-const pool = new Pool({
-  user: "vagrant",
-  password: "123",
-  host: "localhost",
-  database: "lightbnb",
-});
 /// Users
 
 /**
@@ -18,7 +10,7 @@ const pool = new Pool({
 const getUserWithEmail = function (email) {
   const queryParams = [email];
   const queryString = `SELECT * FROM users WHERE email = $1`;
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => {
       if (res.rows) {
@@ -39,7 +31,7 @@ exports.getUserWithEmail = getUserWithEmail;
 const getUserWithId = function (id) {
   const queryParams = [id];
   const queryString = `SELECT * FROM users WHERE id = $1`;
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => {
       if (res.rows) {
@@ -61,7 +53,7 @@ const addUser = function (user) {
   const queryParams = [user.name, user.email, user.password];
   const queryString = `INSERT INTO users (name, email, password)
       VALUES ($1, $2, $3) RETURNING *;`;
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => {
       if (res.rows) {
@@ -91,7 +83,7 @@ WHERE reservations.guest_id = $1 AND reservations.end_date < now()::date
 GROUP BY reservations.id, properties.id
 ORDER BY reservations.start_date
 LIMIT $2;`;
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => res.rows)
     .catch((err) => err.stack);
@@ -163,7 +155,7 @@ const getAllProperties = function (options, limit = 10) {
   console.log(queryString, queryParams);
 
   // 6
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => res.rows)
     .catch((err) => err.stack);
@@ -217,7 +209,7 @@ const addProperty = function (property) {
   RETURNING *;
   `;
 
-  return pool
+  return db
     .query(queryString, queryParams)
     .then((res) => {
       if (res.rows) {
